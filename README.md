@@ -1,2 +1,2 @@
 # edb
-EVM debugger
+A simple EVM debugger
