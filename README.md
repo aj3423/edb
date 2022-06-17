@@ -105,6 +105,15 @@ Maybe limit it to 128 block or less.
 
 Please fire an issure if you have any good solution.
 
+### Install
+Just download the prebuilt executables from release page
+
+#### Or build it yourself:
+1. Install Golang >= 1.18.1
+2. Clone this repo: `git clone github.com/aj3423/edb`
+3. Go to binary dir: `cd edb/main`
+4. Run it with `go run .` or `go build .` to build.
+
 ### Command List
 
 	help:                    Show this help
