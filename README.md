@@ -10,6 +10,10 @@
 
 ![demo](https://user-images.githubusercontent.com/4710875/174415815-58b66113-57ce-4436-9033-fb8b42b68226.gif)
 
+Video tutorial: 
+[1. Basic Usage](https://youtu.be/8kGbPFE2QFM) 
+[2. Predict NFT](https://youtu.be/Znf5LowqVLs)
+
 ### How to "Predict NFTs"?
 Many NFTs use very simple algorithm to randomize the minting result, or the upgrading. This is a demo NFT that used in above screenshot: 
 ```solidity
