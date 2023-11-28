@@ -254,7 +254,7 @@ func opExp(ctx *Context) error {
 }
 
 // b, x ->  y = SIGNEXTEND(x, b)
-//sign extends x from (b + 1) * 8 bits to 256 bits.
+// sign extends x from (b + 1) * 8 bits to 256 bits.
 func opSignExtend(ctx *Context) error {
 	stack := ctx.Stack()
 	back, num := stack.Pop(), stack.Peek()
@@ -446,13 +446,14 @@ func opAddress(ctx *Context) error {
 }
 
 func opBalance(ctx *Context) error {
-	// TODO get online if not set in json
-	return errors.New("TODO opBalance")
-	// slot := ctx.Stack().Peek()
-	// address := common.Address(slot.Bytes20())
-	// bal := ensure_contract_at(ctx, address).Balance
-	// slot.SetFromBig(bal)
-	// return nil
+	slot := ctx.Stack().Peek()
+	address := common.Address(slot.Bytes20())
+	bal, e := ensure_balance(ctx, address)
+	if e != nil {
+		return e
+	}
+	slot.SetFromBig(bal)
+	return nil
 }
 
 func opOrigin(ctx *Context) error {
@@ -485,7 +486,8 @@ func getData(data []byte, start uint64, size uint64) []byte {
 }
 
 // reads a (u)int256 from message data
-//   msg.data[i:i+32]
+//
+//	msg.data[i:i+32]
 func opCallDataLoad(ctx *Context) error {
 	off := ctx.Stack().Peek()
 	if offset, overflow := off.Uint64WithOverflow(); !overflow {
@@ -528,7 +530,8 @@ func opReturnDataSize(ctx *Context) error {
 }
 
 // memory[memOffset : memOffset+length] =
-//     RETURNDATA[dataOffset : dataOffset+length]
+//
+//	RETURNDATA[dataOffset : dataOffset+length]
 func opReturnDataCopy(ctx *Context) error {
 	stack := ctx.Stack()
 	var (
@@ -650,7 +653,7 @@ func opGasprice(ctx *Context) error {
 	return nil
 }
 
-// 	hash = block.blockHash(blockNumber)
+// hash = block.blockHash(blockNumber)
 func opBlockhash(ctx *Context) error {
 	num := ctx.Stack().Peek()
 	num64, overflow := num.Uint64WithOverflow()
@@ -880,6 +883,14 @@ func opCall(ctx *Context) error {
 
 	// when input is empty, it's transfer: `addr.call{value:xxx}("")`
 	if inSize.IsZero() {
+		fromAddr := ctx.Call().This
+		toAddr := common.Address(addr.Bytes20())
+		fromBalance := ctx.Contracts[fromAddr].Balance
+		toBalance := ctx.Contracts[toAddr].Balance
+
+		fromBalance.Sub(fromBalance, value.ToBig())
+		toBalance.Sub(toBalance, value.ToBig())
+
 		// just assume it succeeded
 		stack.Push(*uint256.NewInt(1))
 
@@ -896,6 +907,7 @@ func opCallCode(ctx *Context) error {
 
 /*
 A send tx -> B -> delegatecall(C), in C:
+
 	C.msg == B.msg (msg.sender inside C is A, C has same msg.sender/msg.value as B)
 	C.storage == B.storage
 */
@@ -934,9 +946,9 @@ func opDelegateCall(ctx *Context) error {
 }
 
 /*
-	STATICCALL functions equivalently to a CALL,
-	except it takes only 6 arguments
-	(the “value” argument is not included and taken to be zero).
+STATICCALL functions equivalently to a CALL,
+except it takes only 6 arguments
+(the “value” argument is not included and taken to be zero).
 */
 func opStaticCall(ctx *Context) error {
 	stack := ctx.Stack()

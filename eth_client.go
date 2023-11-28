@@ -137,7 +137,7 @@ func ContextFromTx(
 	if e != nil {
 		return nil, e
 	}
-	msg, e := tx.AsMessage(types.NewEIP155Signer(big.NewInt(int64(chain_id.Uint64()))), nil)
+	msg, e := tx.AsMessage(types.NewLondonSigner(big.NewInt(int64(chain_id.Uint64()))), nil)
 	if e != nil {
 		return nil, e
 	}
